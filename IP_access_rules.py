@@ -55,11 +55,11 @@ def save_to_excel(data, filename='ip_access_rules_zone.xlsx'):
 
 # Main function to orchestrate fetching and processing IP access rules for a zone
 def main():
-    user = AdaptureUser('NCR', token_name='token')  # Replace 'xx' with your actual token name
+    user = AdaptureUser('xx', token_name='token')  # Replace 'xx' with your actual token name
     headers = user.credentials.headers
     
     # Example zone ID - replace with your actual zone ID
-    zone_id = '9376cfbacd66a75f0072bb5c42ff11f7'  # Replace with your actual zone ID
+    zone_id = 'xx'  # Replace with your actual zone ID
     
     # Get all the IP access rules for the given zone
     ip_access_rules = get_all_ip_access_rules(zone_id, headers)
