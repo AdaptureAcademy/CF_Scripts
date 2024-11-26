@@ -3,7 +3,7 @@ import pandas as pd
 from cloudflarest.cloudfluser import AdaptureUser
 
 # Function to retrieve all IP access rules for a given zone, handling pagination
-def get_all_ip_access_rules(zone_id, headers, per_page=200):
+def get_all_ip_access_rules(zone_id, headers, per_page=20):
     url = f"https://api.cloudflare.com/client/v4/zones/{zone_id}/firewall/access_rules/rules?per_page={per_page}"
     
     all_rules = []  # List to hold all IP access rules
@@ -26,19 +26,22 @@ def get_all_ip_access_rules(zone_id, headers, per_page=200):
             print(f"Total rules fetched so far: {len(all_rules)}")
             
             # Check if there are more pages
-            next_page = data['result_info'].get('next_page')
-            if next_page:
+            total_pages = data['result_info'].get('total_pages')
+            
+            if page_number < total_pages:
                 # Update the URL to fetch the next page
-                url = f"https://api.cloudflare.com/client/v4/zones/{zone_id}/firewall/access_rules/rules?per_page={per_page}&page={next_page}"
                 page_number += 1  # Increment the page number
+                # Dynamically modify the URL to fetch the next page
+                url = f"https://api.cloudflare.com/client/v4/zones/{zone_id}/firewall/access_rules/rules?per_page={per_page}&page={page_number}"
             else:
                 # No more pages, we have all the rules
                 print(f"All IP access rules fetched: {len(all_rules)}")
                 break
         else:
-            print(f"Failed to fetch IP access rules for zone {zone_id}: {response.status_code}")
+            # Handle errors and print status code
+            print(f"Failed to fetch IP access rules for zone {zone_id}: {response.status_code}, {response.text}")
             break  # Exit the loop if there's an error
-        
+    
     return all_rules
 
 # Function to save the IP access rules to an Excel file
@@ -52,14 +55,14 @@ def save_to_excel(data, filename='ip_access_rules_zone.xlsx'):
 
 # Main function to orchestrate fetching and processing IP access rules for a zone
 def main():
-    user = AdaptureUser('NCR',token_name='token')  # Replace 'xx' with your actual token name
+    user = AdaptureUser('NCR', token_name='token')  # Replace 'xx' with your actual token name
     headers = user.credentials.headers
     
     # Example zone ID - replace with your actual zone ID
     zone_id = '9376cfbacd66a75f0072bb5c42ff11f7'  # Replace with your actual zone ID
     
     # Get all the IP access rules for the given zone
-    ip_access_rules = get_all_ip_access_rules(zone_id, headers, per_page=1000)
+    ip_access_rules = get_all_ip_access_rules(zone_id, headers)
     
     # Save the IP access rules to an Excel file
     save_to_excel(ip_access_rules)
